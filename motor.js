@@ -128,17 +128,6 @@ const AMOUNT_MAXIMUM_FEMALE = {
   },
 }
 
-const GENRE = {
-  'f': {
-    amountMaximum: { ...AMOUNT_MAXIMUM_FEMALE },
-    amountMinimum: { ...AMOUNT_MINIMUM_FEMALE },
-  },
-  'm': {
-    amountMaximum: { ...AMOUNT_MAXIMUM_MALE },
-    amountMinimum: { ...AMOUNT_MINIMUM_MALE },
-  }
-}
-
 const getMonthsSinceFirstJob = (firstJobDate) => {
 
   const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
@@ -155,7 +144,7 @@ const getMonthsSinceFirstJob = (firstJobDate) => {
   return Math.floor((todayTime - firstJobTime) / MONTH)
 }
 
-const getAmountsForFemale = (totalMonths) => {
+const getAmountsForMale = (totalMonths, tipoNomina) => {
 
   if (typeof value === 'number' && !isNaN(value))
     throw new Error('the total number of months since you got your first job is required')
@@ -163,27 +152,21 @@ const getAmountsForFemale = (totalMonths) => {
   let amountMaximum = null;
   let amountMinimum = null;
 
-  switch (totalMonths) {
-    case totalMonths <= 26:
-      amountMaximum = AMOUNT_MAXIMUM_MALE['26'][tipoNomina]
-      amountMinimum = AMOUNT_MINIMUM_MALE['26'][tipoNomina]
-      break;
-
-    case totalMonths >= 30:
-      amountMaximum = AMOUNT_MAXIMUM_MALE['30'][tipoNomina]
-      amountMinimum = AMOUNT_MINIMUM_MALE['30'][tipoNomina]
-      break;
-
-    default:
-      amountMaximum = AMOUNT_MAXIMUM_MALE[`${totalMonths}`][tipoNomina]
-      amountMinimum = AMOUNT_MINIMUM_MALE[`${totalMonths}`][tipoNomina]
-      break;
+  if (totalMonths <= 26) {
+    amountMaximum = AMOUNT_MAXIMUM_MALE['26'][tipoNomina]
+    amountMinimum = AMOUNT_MINIMUM_MALE['26'][tipoNomina]
+  } else if (totalMonths > 29) {
+    amountMaximum = AMOUNT_MAXIMUM_MALE['30'][tipoNomina]
+    amountMinimum = AMOUNT_MINIMUM_MALE['30'][tipoNomina]
+  } else {
+    amountMaximum = AMOUNT_MAXIMUM_MALE[`${totalMonths}`][tipoNomina]
+    amountMinimum = AMOUNT_MINIMUM_MALE[`${totalMonths}`][tipoNomina]
   }
 
   return { max: amountMaximum, min: amountMinimum }
 }
 
-const getAmountsForMale = (totalMonths) => {
+const getAmountsForFemale = (totalMonths, tipoNomina) => {
 
   if (typeof value === 'number' && !isNaN(value))
     throw new Error('The total number of months since you got your first job is required')
@@ -191,21 +174,15 @@ const getAmountsForMale = (totalMonths) => {
   let amountMaximum = null;
   let amountMinimum = null;
 
-  switch (totalMonths) {
-    case totalMonths <= 24:
-      amountMaximum = AMOUNT_MAXIMUM_FEMALE['24'][tipoNomina]
-      amountMinimum = AMOUNT_MINIMUM_FEMALE['24'][tipoNomina]
-      break;
-
-    case totalMonths >= 28:
-      amountMaximum = AMOUNT_MAXIMUM_FEMALE['28'][tipoNomina]
-      amountMinimum = AMOUNT_MINIMUM_FEMALE['28'][tipoNomina]
-      break;
-
-    default:
-      amountMaximum = AMOUNT_MAXIMUM_FEMALE[`${totalMonths}`][tipoNomina]
-      amountMinimum = AMOUNT_MINIMUM_FEMALE[`${totalMonths}`][tipoNomina]
-      break;
+  if (totalMonths <= 24) {
+    amountMaximum = AMOUNT_MAXIMUM_FEMALE['24'][tipoNomina]
+    amountMinimum = AMOUNT_MINIMUM_FEMALE['24'][tipoNomina]
+  } else if (totalMonths > 27) {
+    amountMaximum = AMOUNT_MAXIMUM_FEMALE['28'][tipoNomina]
+    amountMinimum = AMOUNT_MINIMUM_FEMALE['28'][tipoNomina]
+  } else {
+    amountMaximum = AMOUNT_MAXIMUM_FEMALE[`${totalMonths}`][tipoNomina]
+    amountMinimum = AMOUNT_MINIMUM_FEMALE[`${totalMonths}`][tipoNomina]
   }
 
   return { max: amountMaximum, min: amountMinimum }
@@ -226,8 +203,8 @@ function calculoMotor(tipoNomina, fechaPrimerEmpleo, genero) {
   if (!(['m', 'f'].includes(genero))) throw new Error('Invalid genre');
 
   const amount = genero === 'm'
-    ? getAmountsForMale(monthsSinceFirstJob)
-    : getAmountsForFemale(monthsSinceFirstJob)
+    ? getAmountsForMale(monthsSinceFirstJob, tipoNomina)
+    : getAmountsForFemale(monthsSinceFirstJob, tipoNomina)
 
   const recommendationLinea = getLineaRecommendation(amount.max, amount.min)
 
@@ -239,4 +216,7 @@ function calculoMotor(tipoNomina, fechaPrimerEmpleo, genero) {
 
 }
 
-console.log(calculoMotor('A', '12/06/2022', 'f')) 
+console.log(calculoMotor('A', '12/06/2022', 'f')) // { montoMinimo: 4000, 'montoMáximo': 800, recomendacionLinea: 856.5685424949238 }
+console.log(calculoMotor('B', '30/12/1993', 'f')) // { montoMinimo: 4400, 'montoMáximo': 700, recomendacionLinea: 764.75 }
+console.log(calculoMotor('C', '19/09/2020', 'm')) // { montoMinimo: 4600, 'montoMáximo': 600, recomendacionLinea: 670 }
+console.log(calculoMotor('D', '15/01/2019', 'm')) // { montoMinimo: 4300, 'montoMáximo': 1000, recomendacionLinea: 1057.75 }
