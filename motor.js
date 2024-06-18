@@ -209,8 +209,8 @@ function calculoMotor(tipoNomina, fechaPrimerEmpleo, genero) {
   const recommendationLinea = getLineaRecommendation(amount.max, amount.min)
 
   return {
-    'montoMinimo': amount.max,
-    'montoMáximo': amount.min,
+    'montoMinimo': amount.min,
+    'montoMáximo': amount.max,
     'recomendacionLinea': recommendationLinea
   }
 
